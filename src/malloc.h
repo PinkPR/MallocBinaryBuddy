@@ -12,21 +12,23 @@
 
 typedef struct header
 {
-  size_t          size;
+  size_t          free:1;
+  size_t          size:63;
   struct header*  next;
   struct header*  prev;
 } header;
 
 # define PAGE_SIZE      4096
 # define PAGE_SIZE_POW  13
-# define HEADER_SIZE    (sizeof (struct header))
-# define MIN_SIZE       (getnextpow2(HEADER_SIZE))
-# define MAX_SIZE       (PAGE_SIZE - HEADER_SIZE)
-# define PROT           (PROT_READ | PROT_WRITE)
+# define HEADER_SIZE    8
+# define HD_SIZE        (sizeof (struct header))
+# define PROT           (PROT_READ | PROT_WRITE | PROT_EXEC)
 # define FLAGS          (MAP_ANON | MAP_PRIVATE)
 
 header* free_blocks[PAGE_SIZE_POW + 1];
 
+void  add_block(header* block, size_t size);
 void* malloc(size_t size);
+void  free(void* block);
 
 #endif /* MALLOC_H */

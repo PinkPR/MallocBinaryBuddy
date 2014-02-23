@@ -5,21 +5,25 @@
 
 #include "malloc.h"
 
-void*
-getnewpage(size_t size)
+void* getnewpage(size_t size)
 {
   if (size < PAGE_SIZE)
     size = PAGE_SIZE;
   else
     size = PAGE_SIZE * (size / PAGE_SIZE + 1);
 
-  return mmap(NULL, size, PROT, FLAGS, 0, 0);
+  header* block = mmap(NULL, size, PROT, FLAGS, 0, 0);
+
+  block->size = PAGE_SIZE_POW + size / (PAGE_SIZE + 1);
+
+  return block;
 }
 
 void make_header(header* block, size_t size)
 {
   block->next = NULL;
   block->size = size;
+  block->free = 1;
   block->prev = NULL;
 
   free_blocks[size] = block;
@@ -60,6 +64,7 @@ void split_block(size_t wanted)
 
     block1->size = wanted - 1;
     block2->size = wanted - 1;
+    block2->free = 1;
 
     add_block(block1, block1->size);
     add_block(block2, block2->size);
@@ -78,6 +83,7 @@ header* get_block(size_t wanted)
     free_blocks[wanted]->prev = NULL;
 
   block->next = NULL;
+  block->free = 0;
 
   return block;
 }
@@ -86,5 +92,8 @@ void* malloc(size_t size)
 {
   size += HEADER_SIZE;
 
-  return get_block(getlog2(getnextpow2(size)));
+  if (size > PAGE_SIZE)
+    return (char*) getnewpage(size) + HEADER_SIZE;
+
+  return (char*) get_block(getlog2(getnextpow2(size))) + HEADER_SIZE;
 }
