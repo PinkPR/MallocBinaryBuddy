@@ -3,6 +3,8 @@
 **  February 2014
 */
 
+#include <unistd.h>
+
 #include "malloc.h"
 
 void* getnewpage(size_t size)
@@ -91,6 +93,8 @@ header* get_block(size_t wanted)
 void* malloc(size_t size)
 {
   size += HEADER_SIZE;
+
+  write(STDOUT_FILENO, "GROLOL", 6);
 
   if (size > PAGE_SIZE)
     return (char*) getnewpage(size) + HEADER_SIZE;

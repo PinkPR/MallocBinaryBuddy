@@ -11,7 +11,7 @@ void* calloc(size_t size, size_t nb)
 
   if (ptr)
   {
-    size_t ssize = mypow(2, (((header*) ((char*) ptr - 8))->size)) - 8;
+    size_t ssize = mypow(2, (((header*) ((char*) ptr - 8))->size)) - 7;
     ssize /= 8;
 
     for (size_t i; i < ssize; i++)
