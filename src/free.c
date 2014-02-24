@@ -17,20 +17,26 @@ static void delete_block(header* block)
     free_blocks[block->size] = block->next;
 }
 
-static int recompose(header* block)
+static header* recompose(header* block)
 {
   header* buddy = (char*) (((uintptr_t) block) ^ mypow(2, block->size));
+  header* newblock = NULL;
 
   if (buddy->free && buddy->size == block->size)
   {
-    block->size++;
-    delete_block(buddy);
-    add_block(block, block->size);
+    if ((uintptr_t) block < (uintptr_t) buddy)
+      newblock = block;
+    else
+      newblock = buddy;
 
-    return 1;
+    newblock->size++;
+    delete_block(buddy);
+    add_block(newblock, newblock->size);
+
+    return newblock;
   }
 
-  return 0;
+  return NULL;
 }
 
 static void free_page(header* block)
@@ -49,9 +55,12 @@ void free(void* block)
     return;
   }
 
-  while (recompose(blockk))
+  while ((blockk = recompose(blockk)))
   {
     if (blockk->size == PAGE_SIZE_POW)
+    {
       free_page(blockk);
+      return;
+    }
   }
 }
