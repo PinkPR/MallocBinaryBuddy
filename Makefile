@@ -6,10 +6,10 @@ TARGET= malloc
 all: $(TARGET)
 
 obj: $(SRC)
-	$(CC) $(CFLAGS) -fpic -c $(SRC)
+	$(CC) $(CFLAGS) -fPIC -c $(SRC)
 
 lib: obj
-	$(CC) -dynamiclib *.o -o libmalloc.so
+	$(CC) --shared *.o -o libmalloc.so
 
 $(TARGET): $(SRC)
 	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
